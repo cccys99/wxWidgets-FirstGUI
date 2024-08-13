@@ -2,28 +2,37 @@
 #include <wx/wx.h>
 //#include <wx/spinctrl.h>
 
-enum IDs
-{
-	BUTTON_ID = 2,
-	SLIDER_ID = 3,
-	TEXT_ID = 4
-};
+//enum IDs
+//{
+//	BUTTON_ID = 2,
+//	SLIDER_ID = 3,
+//	TEXT_ID = 4
+//};
 
-//宏将确保每当文本控件中的文本发生变化时 我们的事件处理程序就会被调用
-wxBEGIN_EVENT_TABLE(MainFrame,wxFrame)
-	EVT_BUTTON(BUTTON_ID,MainFrame::OnButtonClicked)
-	EVT_SLIDER(SLIDER_ID,MainFrame::OnSliderChanged)
-	EVT_TEXT(TEXT_ID,MainFrame::OnTextChanged)
-wxEND_EVENT_TABLE()
+////宏将确保每当文本控件中的文本发生变化时 我们的事件处理程序就会被调用
+//wxBEGIN_EVENT_TABLE(MainFrame,wxFrame)
+//	EVT_BUTTON(BUTTON_ID,MainFrame::OnButtonClicked)
+//	EVT_SLIDER(SLIDER_ID,MainFrame::OnSliderChanged)
+//	EVT_TEXT(TEXT_ID,MainFrame::OnTextChanged)
+//wxEND_EVENT_TABLE()
 
 MainFrame::MainFrame(const wxString& title) :wxFrame(nullptr, wxID_ANY, title)
 {
 	//面板 下面这些控件都在面板上
 	wxPanel* panel = new wxPanel(this);
 
-	wxButton* button = new wxButton(panel, BUTTON_ID, "Button", wxPoint(300, 275), wxSize(200, 50));
-	wxSlider* slider = new wxSlider(panel, SLIDER_ID, 0, 0, 100, wxPoint(300, 200), wxSize(200, -1));
-	wxTextCtrl* text = new wxTextCtrl(panel, TEXT_ID, "", wxPoint(300, 370), wxSize(200, -1));
+	wxButton* button = new wxButton(panel, wxID_ANY, "Button", wxPoint(300, 275), wxSize(200, 50)); //这里id改回wxID_ANY
+	wxSlider* slider = new wxSlider(panel, wxID_ANY, 0, 0, 100, wxPoint(300, 200), wxSize(200, -1));
+	wxTextCtrl* text = new wxTextCtrl(panel, wxID_ANY, "", wxPoint(300, 370), wxSize(200, -1));
+
+	//动态事件处理
+	//事件标签通常被称为与事件宏相同的东西 是以wx为前缀的
+	button->Bind(wxEVT_BUTTON, &MainFrame::OnButtonClicked, this);
+	slider->Bind(wxEVT_SLIDER, &MainFrame::OnSliderChanged, this);
+	text->Bind(wxEVT_TEXT, &MainFrame::OnTextChanged, this);
+
+	//解除绑定的方法 用unbind
+	button->Unbind(wxEVT_BUTTON, &MainFrame::OnButtonClicked, this);
 
 	CreateStatusBar();
 
