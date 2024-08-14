@@ -21,18 +21,29 @@ MainFrame::MainFrame(const wxString& title) :wxFrame(nullptr, wxID_ANY, title)
 	//面板 下面这些控件都在面板上
 	wxPanel* panel = new wxPanel(this);
 
-	wxButton* button = new wxButton(panel, wxID_ANY, "Button", wxPoint(300, 275), wxSize(200, 50)); //这里id改回wxID_ANY
-	wxSlider* slider = new wxSlider(panel, wxID_ANY, 0, 0, 100, wxPoint(300, 200), wxSize(200, -1));
-	wxTextCtrl* text = new wxTextCtrl(panel, wxID_ANY, "", wxPoint(300, 370), wxSize(200, -1));
+	wxButton* button1 = new wxButton(panel, wxID_ANY, "Button 1", wxPoint(300, 275), wxSize(200, 50)); //这里id改回wxID_ANY
+	wxButton* button2 = new wxButton(panel, wxID_ANY, "Button 2", wxPoint(300, 350), wxSize(200, 50));
+
+	//wxSlider* slider = new wxSlider(panel, wxID_ANY, 0, 0, 100, wxPoint(300, 200), wxSize(200, -1));
+	//wxTextCtrl* text = new wxTextCtrl(panel, wxID_ANY, "", wxPoint(300, 370), wxSize(200, -1));
 
 	//动态事件处理
 	//事件标签通常被称为与事件宏相同的东西 是以wx为前缀的
-	button->Bind(wxEVT_BUTTON, &MainFrame::OnButtonClicked, this);
-	slider->Bind(wxEVT_SLIDER, &MainFrame::OnSliderChanged, this);
-	text->Bind(wxEVT_TEXT, &MainFrame::OnTextChanged, this);
+	//this->Bind(wxEVT_BUTTON, &MainFrame::OnButtonClicked, this);
+
+	//slider->Bind(wxEVT_SLIDER, &MainFrame::OnSliderChanged, this);
+	//text->Bind(wxEVT_TEXT, &MainFrame::OnTextChanged, this);
 
 	//解除绑定的方法 用unbind
-	button->Unbind(wxEVT_BUTTON, &MainFrame::OnButtonClicked, this);
+	//button->Unbind(wxEVT_BUTTON, &MainFrame::OnButtonClicked, this);
+	
+	//事件传播
+	//将Bind前的button  改成this or panel 依然奏效
+	//button->panel->Frame  有这种关系
+	this->Bind(wxEVT_BUTTON, &MainFrame::OnAnyButtonClicked, this);
+	this->Bind(wxEVT_CLOSE_WINDOW, &MainFrame::OnClose, this);
+	button1->Bind(wxEVT_BUTTON, &MainFrame::OnButton1Clicked, this);
+	button2->Bind(wxEVT_BUTTON, &MainFrame::OnButton2Clicked, this);
 
 	CreateStatusBar();
 
@@ -78,19 +89,40 @@ MainFrame::MainFrame(const wxString& title) :wxFrame(nullptr, wxID_ANY, title)
 
 }
 
-void MainFrame::OnButtonClicked(wxCommandEvent& evt)
+//如果不加evtskip 程序就关闭不了 
+//因为MainFram->wxFrame 子类已经处理了 wxFrame没有接收到我们要关闭它
+void MainFrame::OnClose(wxCloseEvent& evt)
 {
-	wxLogStatus("Button Clicked");
+	wxLogMessage("Frame Closed");
+	evt.Skip(); 
 }
 
-void MainFrame::OnSliderChanged(wxCommandEvent& evt)
+void MainFrame::OnAnyButtonClicked(wxCommandEvent& evt)
 {
-	wxString str = wxString::Format("Slider Value: %d", evt.GetInt());
-	wxLogStatus(str);
+	wxLogMessage("Button Clicked");
 }
 
-void MainFrame::OnTextChanged(wxCommandEvent& evt)
+//事件在传播到达主机之前就被处理了 不希望传播停止的话 需要调用evt.skip
+void MainFrame::OnButton1Clicked(wxCommandEvent& evt)
 {
-	wxString str = wxString::Format("Text: %s", evt.GetString());
-	wxLogStatus(str);
+	wxLogStatus("Button 1 Clicked");
+	evt.Skip();
 }
+
+void MainFrame::OnButton2Clicked(wxCommandEvent& evt)
+{
+	wxLogStatus("Button 2 Clicked");
+	evt.Skip();
+}
+
+//void MainFrame::OnSliderChanged(wxCommandEvent& evt)
+//{
+//	wxString str = wxString::Format("Slider Value: %d", evt.GetInt());
+//	wxLogStatus(str);
+//}
+//
+//void MainFrame::OnTextChanged(wxCommandEvent& evt)
+//{
+//	wxString str = wxString::Format("Text: %s", evt.GetString());
+//	wxLogStatus(str);
+//}
